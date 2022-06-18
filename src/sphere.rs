@@ -17,12 +17,12 @@ impl Sphere {
 
 impl Hittable for Sphere {
     fn hit(&self, ray : &Ray, minimum: f64, maximum: f64) -> Option<Hit> {
-        
+
         let p = ray.origin - self.location;
         let a = ray.direction.dot(ray.direction);
         let b_over_2 = p.dot(ray.direction);
         let c = p.dot(p) - self.radius * self.radius;
-        
+
         let discriminant =  b_over_2 * b_over_2 - a * c;
         if discriminant < 0.0 {
             return None
@@ -46,7 +46,7 @@ impl Hittable for Sphere {
         if !front {
             normal = -normal;
         }
-       
+
         let hit =  Hit::new(hit_point, normal, solution, front);
 
         Some(hit)
