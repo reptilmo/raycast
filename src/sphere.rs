@@ -40,19 +40,14 @@ impl Hittable for Sphere {
             }
         }
 
-        let hit_point = ray.at(solution);
-        let mut normal = (hit_point - self.location) / self.radius;
-        let front =  ray.direction.dot(normal) < 0.0;
-        if !front {
-            normal = -normal;
+        let point = ray.at(solution);
+        let normal = point - self.location / self.radius;
+        let mut hit = Hit::new(point, normal, solution, ray.direction.dot(normal) < 0.0, self.material);
+
+        if !hit.front {
+            hit.normal = -hit.normal;
         }
 
-        let hit =  Hit::new(hit_point, normal, solution, front);
-
         Some(hit)
-    }
-
-    fn material(&self) -> Color {
-        self.material
     }
 }

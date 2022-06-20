@@ -7,15 +7,15 @@ pub struct Hit {
     pub normal: Vec3,
     pub solution: f64,
     pub front: bool,
+    pub material: Color,
 }
 
 impl Hit {
-    pub fn new(point: Point3, normal: Vec3, solution: f64, front: bool) -> Hit {
-        Hit{point, normal, solution, front}
+    pub fn new(point: Point3, normal: Vec3, solution: f64, front: bool, material: Color) -> Hit {
+        Hit{point, normal, solution, front, material}
     }
 }
 
 pub trait Hittable {
     fn hit(&self, ray : &Ray, minimum: f64, maximum: f64) -> Option<Hit>;
-    fn material(&self) -> Color;
 }

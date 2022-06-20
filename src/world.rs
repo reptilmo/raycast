@@ -15,24 +15,23 @@ impl World {
         self.objects.push(obj);
     }
 
-    pub fn test_camera_ray(&self, ray: &Ray) -> Color {
+    pub fn cast_camera_ray(&self, ray: &Ray) -> Option<Hit> {
 
-        let minimum_solution = 0.0;
+        let minimum_solution = 0.001;
         let mut maximum_solution = f64::INFINITY;
-        let mut material = Color::new(1.0, 1.0, 1.0);
-
+        let mut out: Option<Hit> = None;
+        
         for object in self.objects.iter() {
             match object.hit(ray, minimum_solution, maximum_solution) {
-                Some(hit) => {
-                    maximum_solution = hit.solution;
-                    material = hit.normal;
-
-                },
                 None => (),
+                Some (hit) => {
+                    maximum_solution = hit.solution;
+                    out = Some(hit);
+                },
             }
         }
 
-        material
+        out
     }
 }
 

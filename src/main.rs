@@ -24,15 +24,35 @@ use ray::*;
 use world::*;
 use sphere::*;
 
-fn ray_color(world: &World, ray: &Ray) -> Color {
+fn random_in_hemisphere(normal: &Vec3) -> Vec3 {
+    let random = Vec3::random_in_unit_sphere();
+    if random.dot(*normal) > 0.0 {
+        return random
+    }
 
-    world.test_camera_ray(ray)
+    -random
+}
 
-    //let t = 0.5 * (ray.direction.y + 1.0);
-    //let color_1 = Vec3::new(1.0, 1.0, 1.0) * (1.0 - t);
-    //let color_2 = Vec3::new(0.5, 0.7, 1.0) * t;
+fn ray_color(world: &World, ray: &Ray, bounce: &mut i32) -> Color {
 
-    //return color_1 + color_2
+    if *bounce <= 0 {
+        return Color::new(0.0, 0.0, 0.0)
+    }
+
+    match world.cast_camera_ray(ray) {
+        None => (),
+        Some(hit) => {
+            let bounce_point = hit.point + random_in_hemisphere(&hit.normal);
+            let bounced_ray = Ray::new(hit.point, bounce_point - hit.point);
+            *bounce = *bounce - 1;
+            return ray_color(world, &bounced_ray, bounce) * 0.5;
+        },
+    }
+
+    let t = 0.5 * (ray.direction.y + 1.0);
+    let color_1 = Vec3::new(1.0, 1.0, 1.0) * (1.0 - t);
+    let color_2 = Vec3::new(0.5, 0.7, 1.0) * t;
+    return color_1 + color_2
 }
 
 fn write_image(filename: &str, pixels: &[Pixel], bounds: (usize, usize)) {
@@ -48,30 +68,30 @@ fn render(pixels: &mut [Pixel], width: usize, height: usize) {
     let aspect_ration = width as f64 / height as f64;
     let origin = Point3::new(0.0, 0.0, 0.0);
     let fov_factor = f64::tan(fov / 2.0 * PI / 180.0);
-    let samples_per_pixe: usize = 30;
+    let samples_per_pixe: usize = 100;
 
     let mut world = World::new();
-    world.add_object(Box::<Sphere>::new(Sphere::new(Point3::new(0.0, -101.5, -1.0), 100.0, Color::new(0.7, 0.7, 0.7))));
+    world.add_object(Box::<Sphere>::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, Color::new(0.7, 0.7, 0.7))));
     world.add_object(Box::<Sphere>::new(Sphere::new(Point3::new(0.0, 0.0, -5.0), 0.5, Color::new(1.0, 0.0, 0.0))));
     world.add_object(Box::<Sphere>::new(Sphere::new(Point3::new(2.0, 1.0, -8.0), 2.0, Color::new(0.0, 1.0, 0.0))));
-    world.add_object(Box::<Sphere>::new(Sphere::new(Point3::new(-2.0, 0.0, -3.0), 2.0, Color::new(0.0, 0.0, 1.0))));
-    //world.add_object(Box::<Sphere>::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, Color::new(0.0, 0.0, 1.0))));
+    world.add_object(Box::<Sphere>::new(Sphere::new(Point3::new(-1.5, -0.5, -3.0), 0.7, Color::new(0.0, 0.0, 1.0))));
+    //world.add_object(Box::<Sphere>::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, Color::new(1.0, 0.0, 0.0))));
 
     let mut rng = thread_rng();
 
-
-    
     for y in 0..height {
         for x in 0..width {
             let mut color = Color::new(1.0, 1.0, 1.0);
-            for s in 0..samples_per_pixe {
+            for _ in 0..samples_per_pixe {
                 // let u = (2.0 * ((x as f64  + 0.5) / width as f64) - 1.0) * fov_factor * aspect_ration;
                 // let v = 1.0 - 2.0 * ((y as f64 + 0.5) / height as f64) * fov_factor;
                 let u = (2.0 * ((x as f64  + rng.gen::<f64>()) / width as f64) - 1.0) * fov_factor * aspect_ration;
                 let v = 1.0 - 2.0 * ((y as f64 + rng.gen::<f64>()) / height as f64) * fov_factor;
                 
-                let r = Ray::new(origin, (Vec3::new(u, v, -1.0) - origin).unit());
-                color += ray_color(&world, &r);
+                let r = Ray::new(origin, Vec3::new(u, v, -1.0) - origin);
+
+                let mut bounce = 30;
+                color += ray_color(&world, &r, &mut bounce);
             }
 
             let c = color / samples_per_pixe as f64; //FIXME:

@@ -1,5 +1,6 @@
 use std::ops;
 use std::cmp;
+use rand::prelude::*;
 
 pub const PI: f64 = std::f64::consts::PI;
 
@@ -13,6 +14,21 @@ pub struct Vec3 {
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
         Vec3{x, y, z}
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        let mut rng = thread_rng();
+        loop {
+            let v = Vec3{
+                x: rng.gen_range(-1.0..1.0),
+                y: rng.gen_range(-1.0..1.0),
+                z: rng.gen_range(-1.0..1.0)
+            };
+
+            if v.magnitude2() < 1.0 {
+                return v
+            }
+        }
     }
 
     #[inline]
@@ -41,6 +57,13 @@ impl Vec3 {
         }
 
         Vec3::new(0.0, 0.0, 0.0)
+    }
+
+    #[inline]
+    pub fn negate(&mut self) {
+        self.x = -self.x;
+        self.y = -self.y;
+        self.z = -self.z;
     }
 
     #[inline]
@@ -169,4 +192,20 @@ mod tests {
         let b = Vec3::new(0.5, 1.0, 1.5);
         assert_eq!(a / 2.0, b);
     }
+
+    #[test]
+    fn random_in_unit_sphere() {
+        //FIXME: bad unit test
+        let a = Vec3::random_in_unit_sphere();
+        assert!(a.magnitude() < 1.0);
+    }
+
+    #[test]
+    fn negate() {
+        let mut a = Vec3::new(1.0, 2.0, 3.0);
+        let b = Vec3::new(-1.0, -2.0, -3.0);
+        a.negate();
+        assert!(a == b);
+    }
+
 }

@@ -19,7 +19,7 @@
                     "kind": "bin"
                 }
             },
-            "args": ["test.png", "600x600"],
+            "args": ["tmp.png", "600x600"],
             "cwd": "${workspaceFolder}"
         },
         {
