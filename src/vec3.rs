@@ -1,8 +1,9 @@
-use std::ops;
-use std::cmp;
 use rand::prelude::*;
+use std::cmp;
+use std::ops;
 
 pub const PI: f64 = std::f64::consts::PI;
+pub const EPSILON: f64 = f64::EPSILON * 10.0;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Vec3 {
@@ -13,20 +14,20 @@ pub struct Vec3 {
 
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
-        Vec3{x, y, z}
+        Vec3 { x, y, z }
     }
 
     pub fn random_in_unit_sphere() -> Vec3 {
         let mut rng = thread_rng();
         loop {
-            let v = Vec3{
+            let v = Vec3 {
                 x: rng.gen_range(-1.0..1.0),
                 y: rng.gen_range(-1.0..1.0),
-                z: rng.gen_range(-1.0..1.0)
+                z: rng.gen_range(-1.0..1.0),
             };
 
             if v.magnitude2() < 1.0 {
-                return v
+                return v;
             }
         }
     }
@@ -34,17 +35,22 @@ impl Vec3 {
     pub fn random_in_hemisphere(normal: &Vec3) -> Vec3 {
         let random = Vec3::random_in_unit_sphere();
         if random.dot(*normal) > 0.0 {
-            return random
+            return random;
         }
-    
+
         -random
     }
 
     #[inline]
+    pub fn nearly_zero(&self) -> bool {
+        f64::abs(self.x) <= EPSILON && f64::abs(self.y) <= EPSILON && f64::abs(self.z) <= EPSILON
+    }
+
+    #[inline]
     pub fn nearly_eq(&self, other: Vec3) -> bool {
-        f64::abs(self.x - other.x) <= f64::EPSILON * 10.0
-            && f64::abs(self.y - other.y) <= f64::EPSILON * 10.0
-            && f64::abs(self.z - other.z) <= f64::EPSILON * 10.0
+        f64::abs(self.x - other.x) <= EPSILON
+            && f64::abs(self.y - other.y) <= EPSILON
+            && f64::abs(self.z - other.z) <= EPSILON
     }
 
     #[inline]
@@ -62,7 +68,7 @@ impl Vec3 {
         let magnitude = self.magnitude();
 
         if magnitude >= 0.0 {
-            return *self * (1.0 / self.magnitude())
+            return *self * (1.0 / self.magnitude());
         }
 
         Vec3::new(0.0, 0.0, 0.0)
@@ -78,6 +84,12 @@ impl Vec3 {
     #[inline]
     pub fn dot(&self, other: Vec3) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
+    }
+
+    #[inline]
+    pub fn reflect(&self, normal: Vec3) -> Vec3 {
+        // dirtection (self) is pointing in, normal is pointing out
+        *self - (normal * 2.0 * self.dot(normal))
     }
 }
 
@@ -102,7 +114,11 @@ impl ops::Add for Vec3 {
     type Output = Self;
     #[inline]
     fn add(self, other: Vec3) -> Vec3 {
-        Vec3{x: self.x + other.x,  y: self.y + other.y, z: self.z + other.z}
+        Vec3 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
     }
 }
 
@@ -119,7 +135,11 @@ impl ops::Sub for Vec3 {
     type Output = Self;
     #[inline]
     fn sub(self, other: Vec3) -> Vec3 {
-        Vec3{x: self.x - other.x,  y: self.y - other.y, z: self.z - other.z}
+        Vec3 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
     }
 }
 
@@ -167,7 +187,7 @@ impl ops::Div<f64> for Vec3 {
 }
 
 pub type Point3 = Vec3;
-pub type Color = Vec3; //FIXME: implement color and material
+pub type Color = Vec3;
 
 #[cfg(test)]
 mod tests {
@@ -224,5 +244,4 @@ mod tests {
         a.negate();
         assert!(a == b);
     }
-
 }

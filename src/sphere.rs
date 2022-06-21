@@ -1,7 +1,7 @@
-use super::vec3::*;
-use super::ray::*;
 use super::hittable::*;
 use super::material::*;
+use super::ray::*;
+use super::vec3::*;
 
 #[derive(Clone, Debug)]
 pub struct Sphere {
@@ -12,21 +12,24 @@ pub struct Sphere {
 
 impl Sphere {
     pub fn new(location: Point3, radius: f64, material: Material) -> Sphere {
-        Sphere{location, radius, material}
+        Sphere {
+            location,
+            radius,
+            material,
+        }
     }
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray : &Ray, minimum: f64, maximum: f64) -> Option<Hit> {
-
+    fn hit(&self, ray: &Ray, minimum: f64, maximum: f64) -> Option<Hit> {
         let p = ray.origin - self.location;
         let a = ray.direction.dot(ray.direction);
         let b_over_2 = p.dot(ray.direction);
         let c = p.dot(p) - self.radius * self.radius;
 
-        let discriminant =  b_over_2 * b_over_2 - a * c;
+        let discriminant = b_over_2 * b_over_2 - a * c;
         if discriminant < 0.0 {
-            return None
+            return None;
         }
 
         let a_reciprocol = 1.0 / a;
@@ -34,16 +37,21 @@ impl Hittable for Sphere {
 
         let mut solution = (-b_over_2 - d_root) * a_reciprocol;
         if solution < minimum || solution > maximum {
-
             solution = (-b_over_2 + d_root) * a_reciprocol;
             if solution < maximum || solution > maximum {
-                return None
+                return None;
             }
         }
 
         let point = ray.at(solution);
-        let normal = (point - self.location) / self.radius; 
-        let mut hit = Hit::new(point, normal, solution, ray.direction.dot(normal) < 0.0, self.material);
+        let normal = (point - self.location) / self.radius;
+        let mut hit = Hit::new(
+            point,
+            normal,
+            solution,
+            ray.direction.dot(normal) < 0.0,
+            self.material,
+        );
 
         if !hit.front {
             hit.normal = -hit.normal;
