@@ -1,16 +1,17 @@
 use super::vec3::*;
 use super::ray::*;
 use super::hittable::*;
+use super::material::*;
 
 #[derive(Clone, Debug)]
 pub struct Sphere {
     pub location: Point3,
     pub radius: f64,
-    pub material: Color,
+    pub material: Material,
 }
 
 impl Sphere {
-    pub fn new(location: Point3, radius: f64, material: Color) -> Sphere {
+    pub fn new(location: Point3, radius: f64, material: Material) -> Sphere {
         Sphere{location, radius, material}
     }
 }
@@ -41,7 +42,7 @@ impl Hittable for Sphere {
         }
 
         let point = ray.at(solution);
-        let normal = point - self.location / self.radius;
+        let normal = (point - self.location) / self.radius; 
         let mut hit = Hit::new(point, normal, solution, ray.direction.dot(normal) < 0.0, self.material);
 
         if !hit.front {

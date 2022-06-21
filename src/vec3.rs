@@ -31,6 +31,15 @@ impl Vec3 {
         }
     }
 
+    pub fn random_in_hemisphere(normal: &Vec3) -> Vec3 {
+        let random = Vec3::random_in_unit_sphere();
+        if random.dot(*normal) > 0.0 {
+            return random
+        }
+    
+        -random
+    }
+
     #[inline]
     pub fn nearly_eq(&self, other: Vec3) -> bool {
         f64::abs(self.x - other.x) <= f64::EPSILON * 10.0
@@ -128,6 +137,14 @@ impl ops::Mul<f64> for Vec3 {
     #[inline]
     fn mul(self, other: f64) -> Vec3 {
         Vec3::new(self.x * other, self.y * other, self.z * other)
+    }
+}
+
+impl ops::Mul<Vec3> for Vec3 {
+    type Output = Self;
+    #[inline]
+    fn mul(self, other: Vec3) -> Vec3 {
+        Vec3::new(self.x * other.x, self.y * other.y, self.z * other.z)
     }
 }
 

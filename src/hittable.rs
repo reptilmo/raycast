@@ -1,5 +1,6 @@
 use super::vec3::*;
 use super::ray::*;
+use super::material::*;
 
 #[derive(Clone,Debug)]
 pub struct Hit {
@@ -7,11 +8,11 @@ pub struct Hit {
     pub normal: Vec3,
     pub solution: f64,
     pub front: bool,
-    pub material: Color,
+    pub material: Material,
 }
 
 impl Hit {
-    pub fn new(point: Point3, normal: Vec3, solution: f64, front: bool, material: Color) -> Hit {
+    pub fn new(point: Point3, normal: Vec3, solution: f64, front: bool, material: Material) -> Hit {
         Hit{point, normal, solution, front, material}
     }
 }
