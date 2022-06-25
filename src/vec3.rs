@@ -87,9 +87,27 @@ impl Vec3 {
     }
 
     #[inline]
+    pub fn cross(&self, other: Vec3) -> Vec3 {
+        Vec3::new(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
+    }
+
+    #[inline]
     pub fn reflect(&self, normal: Vec3) -> Vec3 {
         // dirtection (self) is pointing in, normal is pointing out
         *self - (normal * 2.0 * self.dot(normal))
+    }
+
+    #[allow(dead_code)]
+    pub fn refract(&self, normal: Vec3, ratio: f64) -> Vec3 {
+        // Snell's Law
+        let cost_theta = f64::min(-self.dot(normal), 1.0);
+        let perpendicular = (*self + normal * cost_theta) * ratio;
+        let parallel = normal * -f64::sqrt(f64::abs(1.0 - perpendicular.magnitude2()));
+        perpendicular + parallel
     }
 }
 

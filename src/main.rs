@@ -10,6 +10,7 @@ use image::ImageEncoder;
 extern crate rand;
 use rand::prelude::*;
 
+mod camera;
 mod hittable;
 mod material;
 mod ray;
@@ -18,6 +19,7 @@ mod utils;
 mod vec3;
 mod world;
 
+use camera::*;
 use material::*;
 use ray::*;
 use sphere::*;
@@ -57,9 +59,9 @@ fn write_image(filename: &str, pixels: &[Pixel], bounds: (usize, usize)) {
 fn render(pixels: &mut [Pixel], width: usize, height: usize) {
     let fov = 90.0;
     let aspect_ration = width as f64 / height as f64;
-    let origin = Point3::new(0.0, 0.0, 0.0);
+    let origin = Point3::new(0.0, 0.0, 10.0);
     let fov_factor = f64::tan(fov / 2.0 * PI / 180.0);
-    let samples_per_pixe: usize = 100;
+    let samples_per_pixel: usize = 100;
 
     let mut world = World::new();
     world.add_object(Box::<Sphere>::new(Sphere::new(
@@ -67,31 +69,53 @@ fn render(pixels: &mut [Pixel], width: usize, height: usize) {
         100.0,
         Material::Diffuse(Color::new(0.7, 0.7, 0.7)),
     )));
+
     world.add_object(Box::<Sphere>::new(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
+        Point3::new(-1.0, 0.0, -1.5),
         0.5,
-        Material::Metalic(Color::new(0.8, 0.8, 0.8), 0.3),
+        Material::Metalic(Color::new(1.0, 0.0, 0.0), 0.5),
     )));
+
     world.add_object(Box::<Sphere>::new(Sphere::new(
-        Point3::new(0.0, 0.0, -1.0),
+        Point3::new(-1.0, 0.0, -1.5),
+        -0.45,
+        Material::Dielectric(1.07),
+    )));
+
+    world.add_object(Box::<Sphere>::new(Sphere::new(
+        Point3::new(0.0, 0.0, -1.5),
         0.5,
         Material::Diffuse(Color::new(0.0, 1.0, 0.0)),
     )));
     world.add_object(Box::<Sphere>::new(Sphere::new(
-        Point3::new(1.0, 0.0, -1.0),
+        Point3::new(1.0, 0.0, -1.5),
         0.5,
-        Material::Metalic(Color::new(0.8, 0.6, 0.2), 1.0),
+        Material::Metalic(Color::new(0.8, 0.6, 0.2), 0.0),
     )));
-    // world.add_object(Box::<Sphere>::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, Material::Diffuse(Color::new(1.0, 0.0, 0.0)))));
+    world.add_object(Box::<Sphere>::new(Sphere::new(
+        Point3::new(0.1, -0.2, -0.5),
+        0.15,
+        Material::Dielectric(1.5),
+    )));
+
+    world.add_object(Box::<Sphere>::new(Sphere::new(
+        Point3::new(0.1, -0.2, -0.5),
+        -0.15,
+        Material::Dielectric(1.5),
+    )));
+
+    world.add_object(Box::<Sphere>::new(Sphere::new(
+        Point3::new(-0.6, -0.3, -0.5),
+        0.1,
+        Material::Dielectric(1.3),
+    )));
 
     let mut rng = thread_rng();
 
     for y in 0..height {
         for x in 0..width {
             let mut color = Color::new(1.0, 1.0, 1.0);
-            for _ in 0..samples_per_pixe {
-                // let u = (2.0 * ((x as f64  + 0.5) / width as f64) - 1.0) * fov_factor * aspect_ration;
-                // let v = 1.0 - 2.0 * ((y as f64 + 0.5) / height as f64) * fov_factor;
+            for _ in 0..samples_per_pixel {
                 let u = (2.0 * ((x as f64 + rng.gen::<f64>()) / width as f64) - 1.0)
                     * fov_factor
                     * aspect_ration;
@@ -101,7 +125,7 @@ fn render(pixels: &mut [Pixel], width: usize, height: usize) {
                 color += ray_color(&world, &r, 30);
             }
 
-            let c = color / samples_per_pixe as f64; //FIXME:
+            let c = color / samples_per_pixel as f64; //FIXME:
 
             pixels[y * width + x] = Pixel {
                 r: (255.0 * utils::clamp(0.0, 1.0, c.x)) as u8,
