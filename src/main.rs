@@ -27,7 +27,7 @@ use utils::*;
 use vec3::*;
 use world::*;
 
-fn ray_color(world: &World, ray: &Ray, bounce: i32) -> Color {
+fn color_ray(world: &World, ray: &Ray, bounce: i32) -> Color {
     if bounce <= 0 {
         return Color::new(0.0, 0.0, 0.0);
     }
@@ -37,7 +37,7 @@ fn ray_color(world: &World, ray: &Ray, bounce: i32) -> Color {
         Some(hit) => match hit.material.scatter(ray, &hit) {
             None => return Color::new(0.0, 0.0, 0.0),
             Some((attenuation, scattered_ray)) => {
-                return ray_color(world, &scattered_ray, bounce - 1) * attenuation
+                return color_ray(world, &scattered_ray, bounce - 1) * attenuation
             }
         },
     }
@@ -59,9 +59,13 @@ fn write_image(filename: &str, pixels: &[Pixel], bounds: (usize, usize)) {
 fn render(pixels: &mut [Pixel], width: usize, height: usize) {
     let fov = 90.0;
     let aspect_ration = width as f64 / height as f64;
-    let origin = Point3::new(0.0, 0.0, 10.0);
-    let fov_factor = f64::tan(fov / 2.0 * PI / 180.0);
     let samples_per_pixel: usize = 100;
+
+    let origin = Point3::new(-1.0, 1.0, 1.0);
+    let look_at = Point3::new(0.0, 0.0, -1.0);
+    let world_up = Vec3::new(0.0, 1.0, 0.0);
+
+    let camera = Camera::new(origin, look_at, world_up, aspect_ration, fov);
 
     let mut world = World::new();
     world.add_object(Box::<Sphere>::new(Sphere::new(
@@ -105,7 +109,7 @@ fn render(pixels: &mut [Pixel], width: usize, height: usize) {
     )));
 
     world.add_object(Box::<Sphere>::new(Sphere::new(
-        Point3::new(-0.6, -0.3, -0.5),
+        Point3::new(-0.15, -0.2, -0.5),
         0.1,
         Material::Dielectric(1.3),
     )));
@@ -116,13 +120,13 @@ fn render(pixels: &mut [Pixel], width: usize, height: usize) {
         for x in 0..width {
             let mut color = Color::new(1.0, 1.0, 1.0);
             for _ in 0..samples_per_pixel {
-                let u = (2.0 * ((x as f64 + rng.gen::<f64>()) / width as f64) - 1.0)
-                    * fov_factor
-                    * aspect_ration;
-                let v = 1.0 - 2.0 * ((y as f64 + rng.gen::<f64>()) / height as f64) * fov_factor;
+                let u = 2.0 * ((x as f64 + rng.gen::<f64>()) / width as f64) - 1.0;
+                // * fov_factor
+                //* aspect_ration;
+                let v = 1.0 - 2.0 * ((y as f64 + rng.gen::<f64>()) / height as f64); // * fov_factor;
 
-                let r = Ray::new(origin, Vec3::new(u, v, -1.0) - origin);
-                color += ray_color(&world, &r, 30);
+                let r = camera.cast_ray(u, v);
+                color += color_ray(&world, &r, 30);
             }
 
             let c = color / samples_per_pixel as f64; //FIXME:

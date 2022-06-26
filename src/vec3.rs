@@ -46,6 +46,7 @@ impl Vec3 {
         f64::abs(self.x) <= EPSILON && f64::abs(self.y) <= EPSILON && f64::abs(self.z) <= EPSILON
     }
 
+    #[allow(dead_code)]
     #[inline]
     pub fn nearly_eq(&self, other: Vec3) -> bool {
         f64::abs(self.x - other.x) <= EPSILON
@@ -72,13 +73,6 @@ impl Vec3 {
         }
 
         Vec3::new(0.0, 0.0, 0.0)
-    }
-
-    #[inline]
-    pub fn negate(&mut self) {
-        self.x = -self.x;
-        self.y = -self.y;
-        self.z = -self.z;
     }
 
     #[inline]
@@ -253,13 +247,5 @@ mod tests {
         //FIXME: bad unit test
         let a = Vec3::random_in_unit_sphere();
         assert!(a.magnitude() < 1.0);
-    }
-
-    #[test]
-    fn negate() {
-        let mut a = Vec3::new(1.0, 2.0, 3.0);
-        let b = Vec3::new(-1.0, -2.0, -3.0);
-        a.negate();
-        assert!(a == b);
     }
 }
