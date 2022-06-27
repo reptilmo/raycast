@@ -9,3 +9,7 @@ edition = "2021"
 rand = "0.8.5"
 image = "0.24.2"
 sdl2 = "0.35.2"
+
+[profile.release-with-debug]
+inherits = "release"
+debug = true

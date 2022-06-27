@@ -16,8 +16,8 @@ impl World {
         self.objects.push(obj);
     }
 
-    pub fn cast_camera_ray(&self, ray: &Ray) -> Option<Hit> {
-        let minimum_solution = 0.001;
+    pub fn test_camera_ray(&self, ray: &Ray) -> Option<Hit> {
+        let minimum_solution = 0.0001;
         let mut maximum_solution = f64::INFINITY;
         let mut out: Option<Hit> = None;
 
