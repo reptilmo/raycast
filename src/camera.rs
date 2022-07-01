@@ -8,10 +8,9 @@ pub struct Camera {
     pub focal_length: f64,
     pub aspec_ratio: f64,
 
-    front: Vec3,
     screen_right: Vec3,
     screen_up: Vec3,
-    screen_center: Point3,
+    screen_front: Vec3,
 }
 
 impl Camera {
@@ -23,14 +22,12 @@ impl Camera {
         aspec_ratio: f64,
     ) -> Camera {
         let front = (look_at - position).unit();
+
         let mut screen_right = front.cross(world_up).unit();
-        let mut screen_up = screen_right.cross(front).unit();
-        let screen_center = position + (front * focal_length);
+        let screen_up = screen_right.cross(front).unit();
+        let screen_front = position + (front * focal_length);
 
-        //  screen_right = screen_right * 2.0;
-        //  screen_up = screen_up * 2.0;
-
-        //FIXME: Use apect_ratio
+        screen_right *= aspec_ratio;
 
         Camera {
             position,
@@ -38,16 +35,14 @@ impl Camera {
             world_up,
             focal_length,
             aspec_ratio,
-            front,
             screen_right,
             screen_up,
-            screen_center,
+            screen_front,
         }
     }
 
     pub fn cast_ray(&self, u: f64, v: f64) -> Ray {
-        let direction = self.screen_center + (self.screen_right * u) + (self.screen_up * v);
-
+        let direction = self.screen_front + (self.screen_right * u) + (self.screen_up * v);
         Ray::new(self.position, direction - self.position)
     }
 }

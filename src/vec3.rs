@@ -2,7 +2,9 @@ use rand::prelude::*;
 use std::cmp;
 use std::ops;
 
+#[allow(dead_code)]
 pub const PI: f64 = std::f64::consts::PI;
+
 pub const EPSILON: f64 = f64::EPSILON * 10.0;
 
 #[derive(Copy, Clone, Debug)]

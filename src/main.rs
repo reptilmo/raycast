@@ -50,8 +50,8 @@ fn main() {
 
 fn random_scene(world: &mut World) {
     world.add_object(Box::<Sphere>::new(Sphere::new(
-        Point3::new(0.0, -1000.0, 0.0),
-        1000.0,
+        Point3::new(0.0, -10000.0, 0.0),
+        10000.0,
         Material::Diffuse(Color::new(0.5, 0.5, 0.5)),
     )));
 
@@ -61,11 +61,11 @@ fn random_scene(world: &mut World) {
         Material::Dielectric(1.5),
     )));
 
-    /*  world.add_object(Box::<Sphere>::new(Sphere::new(
+    world.add_object(Box::<Sphere>::new(Sphere::new(
         Point3::new(-1.0, 0.5, -1.0),
         -0.45,
         Material::Dielectric(1.2),
-    )));*/
+    )));
 
     world.add_object(Box::<Sphere>::new(Sphere::new(
         Point3::new(0.0, 0.5, -1.0),
@@ -78,34 +78,6 @@ fn random_scene(world: &mut World) {
         0.5,
         Material::Metalic(Color::new(0.8, 0.6, 0.2), 0.0),
     )));
-
-    let mut rng = thread_rng();
-
-    for a in -11..1 {
-        for b in -11..1 {
-            let choose_material = rng.gen::<f64>();
-
-            let center = Point3::new(
-                a as f64 + 0.9 * rng.gen::<f64>(),
-                0.2,
-                b as f64 + 0.9 * rng.gen::<f64>(),
-            );
-
-            if choose_material < 0.8 {
-                world.add_object(Box::<Sphere>::new(Sphere::new(
-                    center,
-                    0.1,
-                    Material::Diffuse(Color::new(0.4, 0.2, 0.1)),
-                )));
-            } else if choose_material < 0.95 {
-                world.add_object(Box::<Sphere>::new(Sphere::new(
-                    center,
-                    0.1,
-                    Material::Metalic(Color::new(0.4, 0.2, 0.1), 0.2),
-                )));
-            }
-        }
-    }
 
     world.add_object(Box::<Sphere>::new(Sphere::new(
         Point3::new(0.1, 0.15, -0.2),
@@ -122,7 +94,7 @@ fn random_scene(world: &mut World) {
     world.add_object(Box::<Sphere>::new(Sphere::new(
         Point3::new(-0.5, 0.1, -0.2),
         0.1,
-        Material::Dielectric(1.3),
+        Material::Dielectric(1.5),
     )));
 
     world.add_object(Box::<Sphere>::new(Sphere::new(
@@ -133,16 +105,17 @@ fn random_scene(world: &mut World) {
 }
 
 fn render(pixels: &mut [Pixel], width: usize, height: usize) {
-    let fov = 90.0;
     let aspect_ratio = width as f64 / height as f64;
-    let samples_per_pixel: usize = 40;
-    let fov_factor = f64::tan(fov * 0.5 * PI / 180.0);
+    let samples_per_pixel: u32 = 40;
+    let sampling_factor = 1.0 / samples_per_pixel as f64;
+
+    let focal_length = 2.0;
 
     let camera = Camera::new(
-        Point3::new(0.0, 1.5, 2.0),
+        Point3::new(0.0, 0.0, 2.0),
         Point3::new(0.0, 0.0, -1.0),
         Vec3::new(0.0, 1.0, 0.0),
-        2.0,
+        focal_length,
         aspect_ratio,
     );
 
@@ -159,10 +132,10 @@ fn render(pixels: &mut [Pixel], width: usize, height: usize) {
                 let v = 1.0 - 2.0 * ((y as f64 + rng.gen::<f64>()) / height as f64);
 
                 let r = camera.cast_ray(u, v);
-                color += color_ray(&world, &r, 30);
+                color += color_ray(&world, &r, 10);
             }
 
-            let c = color / samples_per_pixel as f64; //FIXME:
+            let c = color * sampling_factor;
 
             pixels[y * width + x] = Pixel {
                 r: (255.0 * utils::clamp(0.0, 1.0, c.x)) as u8,

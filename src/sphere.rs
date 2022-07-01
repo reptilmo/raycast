@@ -5,17 +5,21 @@ use super::vec3::*;
 
 #[derive(Clone, Debug)]
 pub struct Sphere {
-    pub location: Point3,
-    pub radius: f64,
-    pub material: Material,
+    location: Point3,
+    radius: f64,
+    material: Material,
+    one_over_radius: f64,
 }
 
 impl Sphere {
     pub fn new(location: Point3, radius: f64, material: Material) -> Sphere {
+        let one_over_radius = 1.0 / radius;
+
         Sphere {
             location,
             radius,
             material,
+            one_over_radius,
         }
     }
 }
@@ -33,7 +37,7 @@ impl Hittable for Sphere {
         }
 
         let a_reciprocol = 1.0 / a;
-        let d_root = f64::sqrt(discriminant); //FIXME: sqrt
+        let d_root = f64::sqrt(discriminant);
 
         let mut solution = (-b_over_2 - d_root) * a_reciprocol;
         if solution < minimum || solution > maximum {
@@ -44,7 +48,7 @@ impl Hittable for Sphere {
         }
 
         let point = ray.at(solution);
-        let normal = (point - self.location) / self.radius;
+        let normal = (point - self.location) * self.one_over_radius;
         let mut hit = Hit::new(
             point,
             normal,
