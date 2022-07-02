@@ -112,7 +112,7 @@ fn render(pixels: &mut [Pixel], width: usize, height: usize) {
     let focal_length = 2.0;
 
     let camera = Camera::new(
-        Point3::new(0.0, 0.0, 2.0),
+        Point3::new(0.0, 1.0, 5.0),
         Point3::new(0.0, 0.0, -1.0),
         Vec3::new(0.0, 1.0, 0.0),
         focal_length,
@@ -128,8 +128,8 @@ fn render(pixels: &mut [Pixel], width: usize, height: usize) {
         for x in 0..width {
             let mut color = Color::new(1.0, 1.0, 1.0);
             for _ in 0..samples_per_pixel {
-                let u = 2.0 * ((x as f64 + rng.gen::<f64>()) / width as f64) - 1.0;
-                let v = 1.0 - 2.0 * ((y as f64 + rng.gen::<f64>()) / height as f64);
+                let u = ((x as f64 + rng.gen::<f64>()) / width as f64) - 0.5;
+                let v = 0.5 - ((y as f64 + rng.gen::<f64>()) / height as f64);
 
                 let r = camera.cast_ray(u, v);
                 color += color_ray(&world, &r, 10);

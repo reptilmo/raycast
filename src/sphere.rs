@@ -42,7 +42,7 @@ impl Hittable for Sphere {
         let mut solution = (-b_over_2 - d_root) * a_reciprocol;
         if solution < minimum || solution > maximum {
             solution = (-b_over_2 + d_root) * a_reciprocol;
-            if solution < maximum || solution > maximum {
+            if solution < minimum || solution > maximum {
                 return None;
             }
         }
@@ -63,4 +63,38 @@ impl Hittable for Sphere {
 
         Some(hit)
     }
+}
+
+#[test]
+fn hit_sphere() {
+    let sphere = Sphere::new(Point3::new(0.0, 0.0, 0.0), 1.0, Material::Dielectric(1.5));
+
+    let ray = Ray::new(Point3::new(0.0, 0.0, 1.0), Vec3::new(0.0, 0.0, -1.0));
+    let hit = sphere.hit(&ray, 0.0, f64::INFINITY);
+
+    assert!(hit.is_some());
+    let hit = hit.unwrap();
+
+    assert!(hit.front);
+    assert_eq!(hit.solution, 0.0);
+    assert_eq!(hit.point, Point3::new(0.0, 0.0, 1.0));
+    assert_eq!(hit.normal, Vec3::new(0.0, 0.0, 1.0));
+    assert_eq!(hit.material, Material::Dielectric(1.5));
+
+    let ray = Ray::new(Point3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, -1.0));
+    let hit = sphere.hit(&ray, 0.0, f64::INFINITY);
+
+    assert!(hit.is_some());
+    let hit = hit.unwrap();
+
+    assert!(!hit.front);
+    assert_eq!(hit.solution, 1.0);
+    assert_eq!(hit.point, Point3::new(0.0, 0.0, -1.0));
+    assert_eq!(hit.normal, Vec3::new(0.0, 0.0, 1.0));
+    assert_eq!(hit.material, Material::Dielectric(1.5));
+
+    let ray = Ray::new(Point3::new(0.0, 1.1, 0.0), Vec3::new(0.0, 0.0, -1.0));
+    let hit = sphere.hit(&ray, 0.0, f64::INFINITY);
+
+    assert!(hit.is_none());
 }
