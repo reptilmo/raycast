@@ -66,7 +66,7 @@ impl Renderer {
                 let v = 0.5 - ((y as f64 + rng.gen::<f64>()) / self.height as f64);
 
                 let ray = camera.cast_ray(u, v);
-                color += self.color_ray(&world, &ray, 10);
+                color += self.color_ray(&world, &ray, 64);
             }
 
             let c = color * self.sampling_factor;

@@ -43,11 +43,11 @@ fn main() {
         utils::parse_pair::<usize>(&args[2], 'x').expect("Failed to parse image size");
 
     let aspect_ratio = width as f64 / height as f64;
-    let samples_per_pixel: u32 = 100;
+    let samples_per_pixel: u32 = 500;
     let focal_length = 2.0;
 
     let camera = Camera::new(
-        Point3::new(0.0, 1.0, 3.0),
+        Point3::new(0.0, 1.0, 4.0),
         Point3::new(0.0, 0.0, -1.0),
         Vec3::new(0.0, 1.0, 0.0),
         focal_length,
@@ -76,19 +76,19 @@ fn random_scene(world: &mut World) {
     world.add_object(Sphere::new(
         Point3::new(-1.0, 0.5, -1.0),
         0.5,
-        Material::Dielectric(1.5),
-    ));
-
-    world.add_object(Sphere::new(
-        Point3::new(-1.0, 0.5, -1.0),
-        -0.45,
-        Material::Dielectric(1.2),
+        Material::Diffuse(Color::new(0.1, 0.8, 0.2)),
     ));
 
     world.add_object(Sphere::new(
         Point3::new(0.0, 0.5, -1.0),
         0.5,
-        Material::Diffuse(Color::new(1.0, 0.2, 0.1)),
+        Material::Dielectric(1.1),
+    ));
+
+    world.add_object(Sphere::new(
+        Point3::new(0.0, 0.5, -1.0),
+        -0.45,
+        Material::Dielectric(1.1),
     ));
 
     world.add_object(Sphere::new(
@@ -118,6 +118,6 @@ fn random_scene(world: &mut World) {
     world.add_object(Sphere::new(
         Point3::new(-0.7, 0.05, -0.6),
         0.05,
-        Material::Metalic(Color::new(0.0, 0.9, 0.1), 0.2),
+        Material::Metalic(Color::new(0.9, 0.1, 0.1), 0.2),
     ));
 }
