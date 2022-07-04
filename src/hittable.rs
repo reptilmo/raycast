@@ -2,7 +2,7 @@ use super::material::*;
 use super::ray::*;
 use super::vec3::*;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Hit {
     pub point: Point3,
     pub normal: Vec3,

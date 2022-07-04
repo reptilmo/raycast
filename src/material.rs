@@ -24,7 +24,7 @@ fn diffuse_scatter(_ray: &Ray, hit: &Hit, albedo: &Color) -> Option<(Color, Ray)
     if scatter_direction.nearly_zero() {
         scatter_direction = hit.normal;
     }
-    Some((*albedo, Ray::new(hit.point, scatter_direction))) //FXME: try normal + random unit
+    Some((*albedo, Ray::new(hit.point, scatter_direction)))
 }
 
 fn metalic_scatter(ray: &Ray, hit: &Hit, albedo: &Color, fuziness: &f64) -> Option<(Color, Ray)> {
