@@ -4,6 +4,7 @@ use super::vec3::*;
 use super::world::World;
 
 use rand::prelude::*;
+use rayon::prelude::*;
 
 #[derive(Clone, Debug)]
 #[repr(C)]
@@ -27,45 +28,55 @@ pub struct Renderer {
     width: usize,
     height: usize,
     samples_per_pixel: u32,
+    sampling_factor: f64,
 }
 
 impl Renderer {
     pub fn new(width: usize, height: usize, samples_per_pixel: u32) -> Self {
+        let sampling_factor = 1.0 / samples_per_pixel as f64;
+
         Self {
             width,
             height,
             samples_per_pixel,
+            sampling_factor,
         }
     }
 
     pub fn draw_scene(&self, camera: &Camera, world: &World) -> Vec<Pixel> {
-        let sampling_factor = 1.0 / self.samples_per_pixel as f64;
-        let mut rng = thread_rng();
         let mut pixels = vec![Pixel { r: 0, g: 0, b: 0 }; self.width * self.height];
+        let scanlines: Vec<(usize, &mut [Pixel])> =
+            pixels.chunks_mut(self.width).enumerate().collect();
 
-        for y in 0..self.height {
-            for x in 0..self.width {
-                let mut color = Color::new(1.0, 1.0, 1.0);
-
-                for _ in 0..self.samples_per_pixel {
-                    let u = ((x as f64 + rng.gen::<f64>()) / self.width as f64) - 0.5;
-                    let v = 0.5 - ((y as f64 + rng.gen::<f64>()) / self.height as f64);
-
-                    let ray = camera.cast_ray(u, v);
-                    color += self.color_ray(&world, &ray, 10);
-                }
-
-                let c = color * sampling_factor;
-
-                pixels[y * self.width + x] = Pixel {
-                    r: (255.0 * clamp(0.0, 1.0, c.x)) as u8,
-                    g: (255.0 * clamp(0.0, 1.0, c.y)) as u8,
-                    b: (255.0 * clamp(0.0, 1.0, c.z)) as u8,
-                };
-            }
-        }
+        scanlines
+            .into_par_iter()
+            .for_each(|(y, scanline)| self.draw_scanline(camera, world, y, scanline));
 
         pixels
+    }
+
+    fn draw_scanline(&self, camera: &Camera, world: &World, y: usize, scanline: &mut [Pixel]) {
+        let mut rng = thread_rng();
+
+        for x in 0..self.width {
+            let mut color = Color::new(1.0, 1.0, 1.0);
+
+            for _ in 0..self.samples_per_pixel {
+                let u = ((x as f64 + rng.gen::<f64>()) / self.width as f64) - 0.5;
+                let v = 0.5 - ((y as f64 + rng.gen::<f64>()) / self.height as f64);
+
+                let ray = camera.cast_ray(u, v);
+                color += self.color_ray(&world, &ray, 10);
+            }
+
+            let c = color * self.sampling_factor;
+
+            scanline[x] = Pixel {
+                r: (255.0 * clamp(0.0, 1.0, c.x)) as u8,
+                g: (255.0 * clamp(0.0, 1.0, c.y)) as u8,
+                b: (255.0 * clamp(0.0, 1.0, c.z)) as u8,
+            };
+        }
     }
 
     fn color_ray(&self, world: &World, ray: &Ray, bounce: i32) -> Color {

@@ -1,4 +1,3 @@
-use std::boxed::*;
 use std::io::Write;
 use std::time::Instant;
 
@@ -44,11 +43,11 @@ fn main() {
         utils::parse_pair::<usize>(&args[2], 'x').expect("Failed to parse image size");
 
     let aspect_ratio = width as f64 / height as f64;
-    let samples_per_pixel: u32 = 40;
+    let samples_per_pixel: u32 = 100;
     let focal_length = 2.0;
 
     let camera = Camera::new(
-        Point3::new(0.0, 5.0, 5.0),
+        Point3::new(0.0, 1.0, 3.0),
         Point3::new(0.0, 0.0, -1.0),
         Vec3::new(0.0, 1.0, 0.0),
         focal_length,
@@ -68,57 +67,57 @@ fn main() {
 }
 
 fn random_scene(world: &mut World) {
-    world.add_object(Box::<Sphere>::new(Sphere::new(
+    world.add_object(Sphere::new(
         Point3::new(0.0, -10000.0, 0.0),
         10000.0,
         Material::Diffuse(Color::new(0.5, 0.5, 0.5)),
-    )));
+    ));
 
-    world.add_object(Box::<Sphere>::new(Sphere::new(
+    world.add_object(Sphere::new(
         Point3::new(-1.0, 0.5, -1.0),
         0.5,
         Material::Dielectric(1.5),
-    )));
+    ));
 
-    world.add_object(Box::<Sphere>::new(Sphere::new(
+    world.add_object(Sphere::new(
         Point3::new(-1.0, 0.5, -1.0),
         -0.45,
         Material::Dielectric(1.2),
-    )));
+    ));
 
-    world.add_object(Box::<Sphere>::new(Sphere::new(
+    world.add_object(Sphere::new(
         Point3::new(0.0, 0.5, -1.0),
         0.5,
         Material::Diffuse(Color::new(1.0, 0.2, 0.1)),
-    )));
+    ));
 
-    world.add_object(Box::<Sphere>::new(Sphere::new(
+    world.add_object(Sphere::new(
         Point3::new(1.0, 0.5, -1.0),
         0.5,
         Material::Metalic(Color::new(0.8, 0.6, 0.2), 0.0),
-    )));
+    ));
 
-    world.add_object(Box::<Sphere>::new(Sphere::new(
+    world.add_object(Sphere::new(
         Point3::new(0.1, 0.15, -0.2),
         0.15,
         Material::Dielectric(1.5),
-    )));
+    ));
 
-    world.add_object(Box::<Sphere>::new(Sphere::new(
+    world.add_object(Sphere::new(
         Point3::new(0.1, 0.15, -0.2),
         -0.15,
         Material::Dielectric(1.5),
-    )));
+    ));
 
-    world.add_object(Box::<Sphere>::new(Sphere::new(
+    world.add_object(Sphere::new(
         Point3::new(-0.5, 0.1, -0.2),
         0.1,
         Material::Dielectric(1.5),
-    )));
+    ));
 
-    world.add_object(Box::<Sphere>::new(Sphere::new(
+    world.add_object(Sphere::new(
         Point3::new(-0.7, 0.05, -0.6),
         0.05,
         Material::Metalic(Color::new(0.0, 0.9, 0.1), 0.2),
-    )));
+    ));
 }
