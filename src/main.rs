@@ -1,46 +1,23 @@
-use std::io::Write;
 use std::time::Instant;
 
-extern crate rand;
-
-mod camera;
-mod hittable;
-mod material;
-mod ray;
-mod renderer;
-mod sphere;
-mod utils;
-mod vec3;
-mod world;
-
-use camera::*;
-use material::*;
-use renderer::*;
-use sphere::*;
-use vec3::*;
-use world::*;
+use raycast::camera::*;
+use raycast::material::*;
+use raycast::renderer::*;
+use raycast::sphere::*;
+use raycast::utils::*;
+use raycast::vec3::*;
+use raycast::world::*;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
     if args.len() < 3 {
-        writeln!(
-            std::io::stderr(),
-            "Usage: {} <png file> <image size> ...",
-            args[0]
-        )
-        .unwrap();
-        writeln!(
-            std::io::stderr(),
-            "Example: {} myfile.png 800x600 ...",
-            args[0]
-        )
-        .unwrap();
+        println!("Usage: {} <png file> <image size> ...", args[0]);
+        println!("Example: {} myfile.png 800x600 ...", args[0]);
         std::process::exit(1);
     }
 
-    let (width, height) =
-        utils::parse_pair::<usize>(&args[2], 'x').expect("Failed to parse image size");
+    let (width, height) = parse_pair::<usize>(&args[2], 'x').expect("Failed to parse image size");
 
     let aspect_ratio = width as f64 / height as f64;
     let samples_per_pixel: u32 = 500;
@@ -55,7 +32,7 @@ fn main() {
     );
 
     let mut world = World::new();
-    random_scene(&mut world);
+    raytracer_in_one_weekend_cover(&mut world);
 
     let the_renderer = Renderer::new(width, height, samples_per_pixel);
 
@@ -63,16 +40,19 @@ fn main() {
     let pixels = the_renderer.draw_scene(&camera, &world);
     println!("Renderer.draw_scene: {}ms", now.elapsed().as_millis());
 
-    utils::write_image(&args[1], renderer::pixels_to_bytes(&pixels), width, height);
+    write_image(&args[1], pixels_to_bytes(&pixels), width, height);
 }
 
-fn random_scene(world: &mut World) {
+fn raytracer_in_one_weekend_cover(world: &mut World) {
     world.add_object(Sphere::new(
         Point3::new(0.0, -10000.0, 0.0),
         10000.0,
         Material::Diffuse(Color::new(0.5, 0.5, 0.5)),
     ));
+}
 
+#[allow(dead_code)]
+fn random_scene(world: &mut World) {
     world.add_object(Sphere::new(
         Point3::new(-1.0, 0.5, -1.0),
         0.5,
