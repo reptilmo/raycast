@@ -1,5 +1,6 @@
 use std::boxed::*;
 use std::io::Write;
+use std::time::Instant;
 
 extern crate rand;
 
@@ -58,7 +59,10 @@ fn main() {
     random_scene(&mut world);
 
     let the_renderer = Renderer::new(width, height, samples_per_pixel);
+
+    let now = Instant::now();
     let pixels = the_renderer.draw_scene(&camera, &world);
+    println!("Renderer.draw_scene: {}ms", now.elapsed().as_millis());
 
     utils::write_image(&args[1], renderer::pixels_to_bytes(&pixels), width, height);
 }
