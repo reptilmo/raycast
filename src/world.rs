@@ -13,7 +13,7 @@ impl World {
         }
     }
 
-    pub fn add_object(&mut self, s: Sphere) {
+    pub fn add_sphere(&mut self, s: Sphere) {
         self.spheres.push(s);
     }
 

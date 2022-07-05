@@ -19,6 +19,15 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
+    pub fn random_color() -> Vec3 {
+        let mut rng = thread_rng();
+        Vec3 {
+            x: rng.gen_range(0.0..1.0),
+            y: rng.gen_range(0.0..1.0),
+            z: rng.gen_range(0.0..1.0),
+        }
+    }
+
     pub fn random_in_unit_sphere() -> Vec3 {
         let mut rng = thread_rng();
         loop {
